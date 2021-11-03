@@ -1,0 +1,20 @@
+/*
+blau clar : 81AFBA
+verd: 5cb85c
+vermell: F2572D
+*/
+
+html,body{
+	margin:0;
+	padding:0;
+	color:#F0EAE3;
+	background-color:#81AFBA;
+	height:100%
+}
+body{
+	font-family: sans-serif;
+	font-size:16pt;
+	color:#333;
+	overflow:hidden;
+	
+}
