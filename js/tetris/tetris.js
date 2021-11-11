@@ -121,7 +121,7 @@ var TETRIS = {
                 that.dropPressed = false; 
             }
             if(27 == keycode){
-                that.togglePause();
+                if(!that.game_over) that.togglePause();
 
             }
 		}, false);
@@ -268,6 +268,7 @@ var TETRIS = {
     gameOver : function(){
         this.game_over=true;
         this.fx.gameover.play();
+        this.music.pause();
         clearInterval(this.falltimer);
         // console.log(getStartingEmptyRows(this.container), this.current_tetro.height() , this.current_tetro.padding().bottom);
         // this.current_tetro.position.top = getStartingEmptyRows(this.container) - this.current_tetro.height() - this.current_tetro.padding().bottom;
