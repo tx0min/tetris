@@ -251,24 +251,55 @@ var Tetro = class {
         // // console.log(ret);
         // return ret;
     }
+
+    innerWidth(){
+        var paddings=this.padding();
+        let ret= this.width() - paddings.left - paddings.right;
+        // console.log(this.width() +"-"+ paddings.left +"-"+  paddings.right+ "="+ ret);
+        return ret;
+        // console.log(ret)
+    }
+    innerHeight(){
+        var paddings=this.padding();
+        return this.height() - paddings.top - paddings.bottom;
+    }
+    pixelWidth(size, inner){
+        // console.log(this.innerWidth());
+        let ret;
+        if(arguments.length>1 && inner)
+            ret= size * this.innerWidth();
+        else
+            ret= size * this.width();
+       
+        return ret;
+    }
+    pixelHeight(size, inner){
+        let ret;
+        if(arguments.length>1 && inner)
+            ret= size * this.innerHeight();
+        else
+            ret= size * this.height();
+       
+        return ret;
+    }
+
+   
     rotate(direction){
         this.tetro.shape=rotateMatrix(this.tetro.shape, direction);
     }
-    // movet(){
-    //     this.tetro.shape=rotateMatrix(this.tetro.shape);
-    // }
+    
+    getPeak(){
+        let peak=[];
+        let lastRow=this.tetro.shape[this.height()- this.padding().bottom - 1];
 
-    // moveLeft (){
-
-    // }
-
-    moveDown (){
-
+        for(let col in lastRow){
+            if(lastRow[col]) peak.push(col);
+        }
+        return peak;
     }
+    
 
-    drop (){
-
-    }
+    
 }
 
 	
