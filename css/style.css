@@ -1,14 +1,8 @@
-/*
-blau clar : 81AFBA
-verd: 5cb85c
-vermell: F2572D
-*/
-
 html,body{
 	margin:0;
 	padding:0;
 	color:#F0EAE3;
-	background-color:#666;
+	background-color:rgb(204, 214, 216);
 	height:100%
 }
 body{
@@ -25,6 +19,7 @@ canvas{
 	top:50%;
 	/* width:100%;
 	height:100% */
-	border:3px solid #333;
+	border:0px solid #333;
 	transform: translateX(-50%) translateY(-50%);
+	border-radius:10px;
 }

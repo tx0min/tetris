@@ -14,7 +14,7 @@ var TETRIS = {
     y: 0,
     width:10,
     height:10,
-    bg_color: '#cccccc',
+    bg_color: 'rgb(204, 214, 216)',
     gamezone_color: '#efefef',
     current_tetro: null,
     next_tetro_index: null,
@@ -48,7 +48,8 @@ var TETRIS = {
     dropReleased : true,
 
 
-    drawLane : true,
+    drawLane : false,
+    drawGhost : true,
 
     music : null,
     fx : [],
@@ -469,6 +470,19 @@ var TETRIS = {
            
         }
         
+        if(this.drawGhost){
+            let ghost=this.current_tetro.clone();
+            while(!this.willCollideV(ghost) && !this.inGround(ghost)){
+                ghost.position.top++;
+            }
+            this.ctx.globalAlpha=0.1;
+           
+            ghost.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size);
+            this.ctx.globalAlpha=1;
+           
+        }
+
+
         if(this.current_tetro){
             this.current_tetro.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size);
         }
@@ -568,23 +582,27 @@ var TETRIS = {
 
     },
 
-    inGround : function(){
-        return (this.current_tetro.position.top + this.current_tetro.height()  - this.current_tetro.padding().bottom   >= this.rows );
+    inGround : function(tetro){
+        if(arguments.length==0) tetro=this.current_tetro;
+
+        return (tetro.position.top + tetro.height()  - tetro.padding().bottom   >= this.rows );
     },
 
-    canFallDown : function(){
-        return !this.inGround() && !this.collides('down');
+    canFallDown : function(tetro){
+        if(arguments.length==0) tetro=this.current_tetro;
+
+        return !this.inGround(tetro) && !this.collides('down',tetro);
     },
 
 
     /* dice si colisionará en caso de moverse horizontalmente */
-    willCollideH : function(direction){
-        return this.collides(direction==1?'right':'left');
+    willCollideH : function(direction,tetro){
+        return this.collides((direction==1?'right':'left'),tetro);
     },
     
     /* dice si colisionará en caso de moverse hacia abajo */
-    willCollideV : function(){
-        return this.collides('down');
+    willCollideV : function(tetro){
+        return this.collides('down',tetro);
     },
 
     /** dice si colisiona por la parte izquierda del tetrimino  */
@@ -635,7 +653,11 @@ var TETRIS = {
         // return points.indexOf()
     },
 
-    collides : function(direction){
+    collides : function(direction, tetro){
+        console.log(arguments.length);
+        console.log(tetro);
+        if(arguments.length==1 || !tetro ) tetro=this.current_tetro;
+
         var offsetv=0;
         var offseth=0;
         if(direction){
@@ -648,13 +670,13 @@ var TETRIS = {
             }
         }
 
-        // console.log('collides', this.current_tetro.position , this.container);
+        // console.log('collides', tetro.position , this.container);
 
-        for(var row in this.current_tetro.tetro.shape){
-            for(var col in this.current_tetro.tetro.shape[row]){
-                if(this.current_tetro.tetro.shape[row][col]==1){
-                    let top= parseInt(this.current_tetro.position.top) + parseInt(row) + offsetv;
-                    let left = parseInt(this.current_tetro.position.left) + parseInt(col) + offseth;
+        for(var row in tetro.tetro.shape){
+            for(var col in tetro.tetro.shape[row]){
+                if(tetro.tetro.shape[row][col]==1){
+                    let top= parseInt(tetro.position.top) + parseInt(row) + offsetv;
+                    let left = parseInt(tetro.position.left) + parseInt(col) + offseth;
                     if(top>=0 && top< this.container.length ){
                         if(this.container[top][left] ) return true;
                     }
@@ -665,7 +687,7 @@ var TETRIS = {
     },
 
     dropTetro : function(){
-        // console.log('dropTetro', this.current_tetro);
+        // console.log('dropTetro', tetro);
         var that=this;
         while(!this.willCollideV() && !this.inGround()){
             this.current_tetro.position.top++;
