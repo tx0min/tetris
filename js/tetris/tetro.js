@@ -85,7 +85,9 @@ var Tetro = class {
         };
     }
 
-    static renderTetroSquare(ctx, tetro, x, y, size){
+    static renderTetroSquare(ctx, tetro, x, y, size, radius){
+        // console.log(radius);
+        if(!radius) radius=0;
         ctx.lineWidth = size/10;
         ctx.fillStyle = tetro.bg;
         ctx.strokeStyle = tetro.border;
@@ -98,11 +100,13 @@ var Tetro = class {
         ];
         // console.log(options, ctx.lineWidth);
 
-        ctx.fillRect( options[0], options[1], options[2],options[3]);
-        ctx.strokeRect( options[0] + ctx.lineWidth /2 , options[1] + ctx.lineWidth/2 , options[2] - (ctx.lineWidth),options[3] - (ctx.lineWidth));
+        ctx.roundRect(options[0], options[1], options[2],options[3], radius, true, false);
+        ctx.roundRect( options[0] + ctx.lineWidth /2 , options[1] + ctx.lineWidth/2 , options[2] - (ctx.lineWidth),options[3] - (ctx.lineWidth), radius, false, true);
+        // ctx.fillRect( options[0], options[1], options[2],options[3]);
+        // ctx.strokeRect( options[0] + ctx.lineWidth /2 , options[1] + ctx.lineWidth/2 , options[2] - (ctx.lineWidth),options[3] - (ctx.lineWidth));
 
     }
-    static renderTetro(ctx, tetro, x, y, size){
+    static renderTetro(ctx, tetro, x, y, size, radius){
       
         for(var i in tetro.shape){
             for(var j in tetro.shape[i]){
@@ -113,7 +117,8 @@ var Tetro = class {
                         tetro, 
                         x + (parseInt(j) * size), 
                         y + (parseInt(i) * size), 
-                        size
+                        size,
+                        radius
                     );
 
                 }
@@ -124,13 +129,14 @@ var Tetro = class {
     }
 
 
-    render(start_x, start_y, size){
+    render(start_x, start_y, size, radius){
         Tetro.renderTetro(
             this.ctx, 
             this.tetro, 
             start_x + (parseInt(this.position.left) * size), 
             start_y + (parseInt(this.position.top) * size), 
-            size
+            size,
+            radius
         );
         
         

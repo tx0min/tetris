@@ -2,7 +2,8 @@ html,body{
 	margin:0;
 	padding:0;
 	color:#F0EAE3;
-	background-color:rgb(204, 214, 216);
+	/* background-color:rgb(204, 214, 216); */
+	background-color:rgb(34, 96, 109);
 	height:100%
 }
 body{

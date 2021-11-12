@@ -1,10 +1,12 @@
 var TETRIS = {
-    tetro_size : 45,
+    tetro_size : 40,
+    tetro_radius : 4,
 	cols : 10,
     rows : 18,
-	fall_speed : 30, // frames
+	fall_speed : 30, // frames (lesses is quicker)
 	fall_countdown : 0, // milliseconds
 	score : 0,
+    score_timer:0,
 	start_time : null,
 	time : null,
     ready: false,
@@ -14,8 +16,8 @@ var TETRIS = {
     y: 0,
     width:10,
     height:10,
-    bg_color: 'rgb(204, 214, 216)',
-    gamezone_color: '#efefef',
+    bg_color: 'rgb(192, 215, 219)',
+    gamezone_color: 'rgb(235, 240, 241)',
     current_tetro: null,
     next_tetro_index: null,
 
@@ -37,13 +39,13 @@ var TETRIS = {
     lines_animation:false,
     lines_animation_counter:0,
     lines_animation_duration:40,
-    lines_animation_color:'#40d6fc',
-    lines_animation_border_color:'#a4ddeb',
+    lines_animation_color:'rgb(24, 196, 226)',
+    lines_animation_border_color:'rgb(192, 215, 219)',
     lines_pulse:10,
     lines_pulse_counter:0,
 
     texts_color: '#ffffff',
-    texts_border_color: '#666666',
+    texts_border_color: 'rgb(34, 96, 109)',
     dropPressed : false,
     dropReleased : true,
 
@@ -53,6 +55,8 @@ var TETRIS = {
 
     music : null,
     fx : [],
+    fx_muted:false,
+
     gamestarted : false,
 
     create: function(){
@@ -113,16 +117,30 @@ var TETRIS = {
 		addEventListener("keyup", function (e) {
             let keycode=(e.keyCode || e.which);
             
+            // console.log(keycode);            
+
+
 			delete that.keysDown[keycode];
-            // console
             
-            
+             
             if(38 == keycode){
                 that.dropReleased = true; 
                 that.dropPressed = false; 
             }
             if(27 == keycode){
-                if(!that.game_over) that.togglePause();
+                if(that.gamestarted && !that.game_over) that.togglePause();
+
+            }
+            if(71 == keycode){ //g
+                if(that.gamestarted && !that.game_over)  that.toggleGhostMode();
+
+            }
+            if(77 == keycode){ //m
+                if(that.gamestarted && !that.game_over)  that.toggleMusic();
+
+            }
+            if(78 == keycode){ //n
+                if(that.gamestarted && !that.game_over)  that.toggleFx();
 
             }
 		}, false);
@@ -177,10 +195,33 @@ var TETRIS = {
 
         
     },
+    toggleMusic: function(){
+        console.log(this.music,this.music.playing());
+        this.music.playing() ? this.music.pause() : this.music.play();
+    },
+    toggleFx: function(){
+        this.fx_muted = !this.fx_muted;
+
+    },
+    toggleGhostMode: function(){
+        if(this.drawGhost){
+            this.drawLane =true;
+            this.drawGhost =false;
+        }else if(this.drawLane){
+            this.drawLane =false;
+            this.drawGhost =false;
+        }else{
+            this.drawLane =false;
+            this.drawGhost =true;
+        }
+    },
+    playFx: function(name){
+        if(!this.fx_muted && this.fx[name]) this.fx[name].play();
+    },
     togglePause: function(){
         this.pause = !this.pause; //a
         if(this.pause){
-            this.fx.pause.play();
+            this.playFx('pause');
             this.music.pause();
         }else{
             this.music.play();
@@ -212,10 +253,11 @@ var TETRIS = {
             this.moveDelayCounter++;
             this.fallDelayCounter++;
             
-        
+            
             
             // console.log(seconds);
             if(!this.pause ){
+                this.score_timer++;
                 if(this.dropPressed) this.dropTetro();
                 if(39 in this.keysDown) this.moveTetro(1);
                 if(37 in this.keysDown) this.moveTetro(-1);
@@ -267,8 +309,9 @@ var TETRIS = {
     },
 
     gameOver : function(){
+        // alert('gameOver');
         this.game_over=true;
-        this.fx.gameover.play();
+        this.playFx('gameover');
         this.music.pause();
         clearInterval(this.falltimer);
         // console.log(getStartingEmptyRows(this.container), this.current_tetro.height() , this.current_tetro.padding().bottom);
@@ -278,16 +321,34 @@ var TETRIS = {
     },
 
     renderWelcome : function(){
-        this.ctx.font = "50px Helvetica";
+        this.ctx.font = "80px Helvetica";
         this.ctx.textAlign="center";
         this.ctx.textBaseline = "middle";
         
+        this.ctx.fillStyle = this.texts_border_color;
+        // this.ctx.strokeStyle  = this.texts_border_color;
+        
+        this.ctx.fillText("TETRIS.js" , this.width/2 , this.height /2 - 80);
+        
         this.ctx.fillStyle = this.texts_color;
-        this.ctx.strokeStyle  = this.texts_border_color;
-
-        this.ctx.fillStrokeText("TXOTRIS" , this.width/2 , this.height /2 - 20);
         this.ctx.font = "20px Helvetica";
-        this.ctx.fillStrokeText("Press any key to start" , this.width/2 , this.height /2 + 10);
+        this.ctx.fillText("Press any key to start" , this.width/2 , this.height /2 + -20);
+
+
+        this.ctx.font = "15px Helvetica";
+        this.ctx.fillStyle = this.texts_border_color;
+        var margin=0;
+
+        this.ctx.fillText("ARROW left/right: Move left/right" , this.width/2 , this.height /2 + 30 + margin);
+        this.ctx.fillText("ARROW down: Move down" , this.width/2 , this.height /2 + 50 + margin);
+        this.ctx.fillText("ARROW up: Drop" , this.width/2 , this.height /2 + 70 + margin);
+        this.ctx.fillText("A/S: Rotate left/right" , this.width/2 , this.height /2 + 90 + margin);
+        this.ctx.fillText("G: toggle help mode" , this.width/2 , this.height /2 + 110 + margin);
+        this.ctx.fillText("M: toggle music" , this.width/2 , this.height /2 + 130 + margin);
+        this.ctx.fillText("N: toggle fx" , this.width/2 , this.height /2 + 150 + margin);
+        this.ctx.fillText("ESC: pause" , this.width/2 , this.height /2 + 170 + margin);
+        this.ctx.fillText("F5: restart" , this.width/2 , this.height /2 + 190 + margin);
+
         
     },
     renderLinesAnimation : function(){
@@ -351,7 +412,10 @@ var TETRIS = {
         // this.ctx.globalAlpha=1;
         let start_x=this.getGameZoneX();
         let start_y=this.getGameZoneY();
+
+        // roundRect = function (x, y, width, height, radius, fill, stroke) 
         this.ctx.fillRect(start_x, start_y, this.getGameZoneW(), this.getGameZoneH());
+        // this.ctx.roundRect(start_x, start_y, this.getGameZoneW(), this.getGameZoneH(), 10, true, false);
     },
     
     
@@ -397,7 +461,8 @@ var TETRIS = {
                         this.container[row][col],
                         start_x + (col * this.tetro_size),
                         start_y +  (row * this.tetro_size) , 
-                        this.tetro_size
+                        this.tetro_size,
+                        this.tetro_radius
                     );                
                 }
             }
@@ -407,6 +472,8 @@ var TETRIS = {
 
     renderScoreZone : function(){
         // Score
+        let padding=20;
+
         this.ctx.fillStyle = this.texts_border_color;
         this.ctx.strokeStyle  = this.texts_color;
         this.ctx.lineWidth = 2;
@@ -414,19 +481,18 @@ var TETRIS = {
         this.ctx.textBaseline = "top";
         this.ctx.textAlign="start";
 
-        this.ctx.fillStrokeText("Score" , 10, 10);
-        this.ctx.fillStrokeText("Time", 10, 100);
-        this.ctx.fillStrokeText("Next" , 10, 190);
+        this.ctx.fillStrokeText("Score" , padding, padding);
+        this.ctx.fillStrokeText("Time", padding, 110);
+        this.ctx.fillStrokeText("Next" , padding, 200);
         
         this.ctx.fillStyle = this.texts_color;
         this.ctx.strokeStyle  = this.texts_border_color;
 
-        this.ctx.fillStrokeText(this.score, 10, 40);
+        this.ctx.fillStrokeText(this.score, padding, 50);
 
-        // console.log(this.timer);
         
-        const seconds = lpad( Math.floor( ((this.time - this.start_time)/1000)  ), 5);
-        this.ctx.fillStrokeText(seconds, 10, 130);
+        const seconds = lpad( Math.floor( ((this.score_timer)/60)  ), 5); ///60fps
+        this.ctx.fillStrokeText(seconds, padding, 140);
 
         //pinto el siguiente tetro
 
@@ -434,18 +500,20 @@ var TETRIS = {
 
         this.ctx.fillStyle = this.gamezone_color;
         // this.ctx.globalAlpha=1;
-        let tetro_start_x=10;
-        let tetro_start_y=220;
+        let tetro_start_x=padding;
+        let tetro_start_y=235;
         let tetro_square_width=this.width - this.getGameZoneW() - (tetro_start_x*2);
-        let tetro_square_height=150
-        this.ctx.fillRect(tetro_start_x, tetro_start_y,  tetro_square_width , tetro_square_height);
+        let tetro_square_height=100
+        this.ctx.lineWidth = 3;
+        this.ctx.roundRect(tetro_start_x, tetro_start_y,  tetro_square_width , tetro_square_height, 20, true, true );
 
         let tmptetro=new Tetro(this.ctx, this.next_tetro_index);
         // tmptetro.pixelWidth(this.tetro_size/2);
         tmptetro.render(
             tetro_start_x + (tetro_square_width - tmptetro.pixelWidth(this.tetro_size/2))/2 , 
             tetro_start_y + (tetro_square_height - tmptetro.pixelHeight(this.tetro_size/2))/2 , 
-            this.tetro_size/2
+            this.tetro_size/2,
+            this.tetro_radius/2
         );
         // this.ctx.scale(1,1);
 
@@ -477,14 +545,14 @@ var TETRIS = {
             }
             this.ctx.globalAlpha=0.1;
            
-            ghost.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size);
+            ghost.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size, this.tetro_radius);
             this.ctx.globalAlpha=1;
            
         }
 
 
         if(this.current_tetro){
-            this.current_tetro.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size);
+            this.current_tetro.render(this.getGameZoneX(), this.getGameZoneY(), this.tetro_size, this.tetro_radius);
         }
 
         this.ctx.globalAlpha=1;
@@ -532,7 +600,7 @@ var TETRIS = {
 
             this.current_tetro.rotate(direction);
             
-            this.fx.rotate.play();
+            this.playFx('rotate');
             var corrected=false;
             // console.log('padding', this.current_tetro.padding());
             if(!this.inBounds()){
@@ -654,8 +722,8 @@ var TETRIS = {
     },
 
     collides : function(direction, tetro){
-        console.log(arguments.length);
-        console.log(tetro);
+        // console.log(arguments.length);
+        // console.log(tetro);
         if(arguments.length==1 || !tetro ) tetro=this.current_tetro;
 
         var offsetv=0;
@@ -708,7 +776,7 @@ var TETRIS = {
                     this.fixTetro();
                     
                     //play sound
-                    this.fx.land.play();
+                    this.playFx('land');
 
                     //check for lines
 
@@ -766,9 +834,9 @@ var TETRIS = {
         var prev=-1;
         blocksindex=0;
         if(this.lines.length==4){
-            this.fx.tetris.play();
+            this.playFx('tetris');
         }else{
-            this.fx.line.play();
+            this.playFx('line');
         }
         for(var i in this.lines){
             let row=this.lines[i];
@@ -863,7 +931,7 @@ var TETRIS = {
             this.current_tetro.position.left += direction ;
             this.moveDelayCounter=0;
 
-            this.fx.move.play();
+            this.playFx('move');
             
         }
     
