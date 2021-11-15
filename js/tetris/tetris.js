@@ -760,6 +760,8 @@ var TETRIS = {
         while(!this.willCollideV() && !this.inGround()){
             this.current_tetro.position.top++;
         }
+        this.fall_countdown = this.fall_speed;
+        this.fallDelayCounter = this.fallDelay;
         this.dropPressed=false;
     },
 
@@ -802,6 +804,7 @@ var TETRIS = {
         if(this.fall_countdown >= this.fall_speed){
             this.moveDownTetro();
             this.fall_countdown = 0;
+            this.fallDelayCounter = 0;
         }
     },
     fixTetro: function(){
