@@ -26,13 +26,13 @@ var TETRIS = {
     game_over:false,
     pause:false,
 
-    rotateDelayCounter:60,
+    rotateDelayCounter:10,
     rotateDelay:10,
     
-    moveDelayCounter:60,
+    moveDelayCounter:5,
     moveDelay:5,
 
-    fallDelayCounter:30,
+    fallDelayCounter:5,
     fallDelay:5,
     
     lines: [],
@@ -143,6 +143,12 @@ var TETRIS = {
                 if(that.gamestarted && !that.game_over)  that.toggleFx();
 
             }
+
+            if(39 == keycode || 39 == keycode) this.moveDelayCounter = this.moveDelay;
+            if(40 == keycode) this.fallDelayCounter = this.fallDelay;
+            if(83 == keycode ||  65 == keycode) this.rotateDelayCounter = this.rotateDelay;
+
+               
 		}, false);
 
 
@@ -489,6 +495,8 @@ var TETRIS = {
         this.ctx.strokeStyle  = this.texts_border_color;
 
         this.ctx.fillStrokeText(this.score, padding, 50);
+        
+        
 
         
         const seconds = lpad( Math.floor( ((this.score_timer)/60)  ), 5); ///60fps
@@ -515,6 +523,11 @@ var TETRIS = {
             this.tetro_size/2,
             this.tetro_radius/2
         );
+
+        this.ctx.fillStyle = this.texts_border_color;
+        
+        this.ctx.font = "12px Helvetica";
+        this.ctx.fillText(this.moveDelayCounter, 10, 10);
         // this.ctx.scale(1,1);
 
     },
@@ -933,7 +946,6 @@ var TETRIS = {
         if(this.moveDelayCounter >= this.moveDelay){
             this.current_tetro.position.left += direction ;
             this.moveDelayCounter=0;
-
             this.playFx('move');
             
         }
